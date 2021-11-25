@@ -1,0 +1,5 @@
+# Project exclude paths
+/datasets/
+/experiments/
+# Project exclude paths
+/data/dehaze/

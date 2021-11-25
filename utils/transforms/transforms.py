@@ -1,0 +1,54 @@
+import random
+import torchvision.transforms as v_transforms
+import torchvision.transforms.functional as F_t
+
+def get_transform_params(img_size, crop_size):
+    _, h, w = img_size # in Tensor format
+    x = random.randint(0, max(0, w - crop_size))
+    y = random.randint(0, max(0, h - crop_size))
+
+    is_horizontal_flip = random.uniform(0, 1) > 0.5
+    params = {'crop_position': (x, y), 'crop_size': crop_size, 'is_horizontal_flip': is_horizontal_flip}
+    return params
+
+def get_transform(transform_params, is_train=True, normalization=False):
+    """
+    
+    """
+    transform_list = []
+
+    if is_train:
+        transform_list.append(
+            v_transforms.Lambda(
+                lambda img: crop(img, transform_params['crop_position'], transform_params['crop_size'])
+            )
+        )
+        transform_list.append(
+            v_transforms.Lambda(
+                lambda img: horizontal_flip(img, transform_params['is_horizontal_flip'])
+            )
+        )
+    else:
+        transform_list.append(v_transforms.CenterCrop(transform_params['crop_size']))
+    # transform_list.append(transforms.ToTensor())
+    if normalization:
+        transform_list.append(v_transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+
+    return v_transforms.Compose(transform_list)
+
+def crop(img, pos, crop_size):
+    """
+    img: torch.Tensor
+    Note: can crop outside boundary, but it can be handled by choosing top-left point that is safe to crop
+    """
+    _, h, w = img.size() # pil format w, h
+    x, y = pos
+    tw = th = crop_size
+    if (w > tw or h > th):
+        return img[:, y:y+th, x:x+tw]
+    return img
+
+def horizontal_flip(img, is_flip):
+    if is_flip:
+        return F_t.hflip(img)
+    return img
