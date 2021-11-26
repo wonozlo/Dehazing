@@ -27,8 +27,9 @@ class DehazeLoader:
                     num_workers=args.data_loader_workers
                 )
             else:
+                self.train_loader = None
                 test_dataset = HazeDataset(args.data_path, "test")
-                self.test_loader = DataLoader(
+                self.val_loader = DataLoader(
                     test_dataset, batch_size=args.val_batch_size, shuffle=False,
                     num_workers=args.data_loader_workers
                 )

@@ -45,10 +45,10 @@ class HazeDataset(Dataset):
             imgB = self.transform(imgB)
         else:
             imgB = torch.zeros_like(imgA)
-        i, j, h, w = transforms.RandomCrop.get_params(
-            imgA, output_size=(self.crop_size, self.crop_size))
-        imgA = TF.crop(imgA, i, j, h, w)
         if self.mode == "train":
+            i, j, h, w = transforms.RandomCrop.get_params(
+                imgA, output_size=(self.crop_size, self.crop_size))
+            imgA = TF.crop(imgA, i, j, h, w)
             imgB = TF.crop(imgB, i, j, h, w)
 
             # Random horizontal flipping

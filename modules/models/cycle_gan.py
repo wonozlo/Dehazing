@@ -13,7 +13,7 @@ from modules.components import build_components
 from utils.aux_tool import ImagePool
 
 from tensorboardX import SummaryWriter
-from utils.plot import plot_samples_per_epoch, plot_image, plot_val_samples
+from utils.plot import plot_samples_per_epoch, plot_image, plot_val_samples, stitch
 from utils.misc import AverageMeter
 from tqdm import tqdm
 from utils.metrics import calculate_batch_psnr, calculate_batch_ssim
@@ -195,10 +195,10 @@ class CycleGAN(BaseModel):
             img_A, _ = data
             img_A = img_A.to(self.device)
 
-            self.generator_optimizer.zero_grad()
-            self.discriminator_optimizer.zero_grad()
-
-            fake_B = self.net_G_A(img_A)
+            if self.args.stitch:
+                fake_B = stitch(self.net_G_A, img_A, n_patches=self.args.stitch_n_patches, size_constraints=4)
+            else:
+                fake_B = self.net_G_A(img_A)
             # DEBUG
             img_A = self.unnormalizer(img_A)
             fake_B = self.unnormalizer(fake_B)

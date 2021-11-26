@@ -1,6 +1,7 @@
 import imageio
 import os
 import torchvision.utils as v_utils
+import torchvision.transforms.functional as TF
 import torch
 
 
@@ -42,7 +43,7 @@ def make_laplacian_img(pyramid):
         lap_pyramid.append(v_utils.make_grid(pyramid[i], nrow=4, padding=2, normalize=True))
     return lap_pyramid
 
-def stitch(net, input_tensor, n_patches=[4, 4], output_channels=3, mask=None, output_index=None):
+def stitch(net, input_tensor, n_patches=[4, 4], output_channels=3, mask=None, output_index=None, size_constraints=1):
     """
     input tensor must have size 1, C, H, W
     net: network
@@ -53,7 +54,19 @@ def stitch(net, input_tensor, n_patches=[4, 4], output_channels=3, mask=None, ou
     # Stitching part
     extra_region_size = 32
 
-    _, c, h, w = input_tensor.size() # for now bs must be one
+    _, c, h, w = input_tensor.shape # for now bs must be one
+    h_constraints = size_constraints * n_patches[0]
+    w_constraints = size_constraints * n_patches[1]
+    if h // h_constraints != 0:
+        h_pad = h_constraints - (h % h_constraints)
+    else:
+        h_pad = 0
+    if w // w_constraints != 0:
+        w_pad = w_constraints - (w % w_constraints)
+    else:
+        w_pad = 0
+    input_tensor = TF.pad(input_tensor, padding=[w_pad, h_pad, 0, 0])
+    _, c, h, w = input_tensor.shape # for now bs must be one
     patch_size = [h // n_patches[0], w // n_patches[1]]
 
     output = torch.zeros((1, output_channels, h, w), dtype=input_tensor.dtype, device=input_tensor.device)
@@ -85,7 +98,7 @@ def stitch(net, input_tensor, n_patches=[4, 4], output_channels=3, mask=None, ou
                 :, :, patch_position[0]:patch_position[2], patch_position[1]:patch_position[3]
             ]
 
-    return output
+    return output[:, :, h_pad:, w_pad:]
 
 def _get_patch_mapping_position(img_tensor, patch_size, extra_region_size, top_left_position, is_corner):
     """

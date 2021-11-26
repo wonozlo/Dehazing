@@ -1,11 +1,11 @@
 {
-    "exp_name": "translation_cyclegan_exp_0",
+    "exp_name": "translation_cyclegan_exp_0_testing",
     "model_module": "cycle_gan",
     "model_name": "CycleGAN",
-    "mode": "training",
+    "mode": "testing",
 
     "stitch": true,
-    "stitch_n_patches": [2, 2],
+    "stitch_n_patches": [4, 4],
 
     "data_loader_module": "image_dehazing",
     "data_loader_name": "DehazeLoader",
@@ -43,5 +43,6 @@
     "max_epoch": 400,
  
     "validate_every": 1,
-    "save_every": 20
+    "save_every": 20,
+    "resume": "experiments/translation_cyclegan_exp_0/checkpoints/final_checkpoint.pth"
 }
